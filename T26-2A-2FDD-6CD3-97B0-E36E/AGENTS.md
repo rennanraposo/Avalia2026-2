@@ -1,34 +1,25 @@
-# Documentação de Engenharia de Agentes e Harness (T26-2A-2FDD-6CD3-97B0-E36E)
+# Agentes e harness do Projeto 0
 
-> **Requisito da Rubrica (25 pontos):** Uso obrigatório de no mínimo **3 agentes diferentes** (sendo obrigatoriamente **1 agente dedicado a teste e validação**), documentando em qual *harness* operaram e relacionando as *skills* na pasta `skills/`.
+Chave: T26-2A-2FDD-6CD3-97B0-E36E. Este é o treino de ambiente, sem nota e sem Pull Request oficial.
 
-## 1. Ambiente de Orquestração (Harness Utilizado)
+A estrutura original foi criada pelo inicializador do professor. A correção em 13/11/2026 foi realizada pelo coordenador no Codex desktop. Ela reutilizou a autenticação desenvolvida e testada na entrega oficial P26-2A-8128-14AF-3AAC-AE61 (branch projeto-24), onde os três subagentes foram realmente executados.
 
-- **Harness Principal:** *(Descreva aqui qual harness foi utilizado, ex: Antigravity / Claude Code / Cursor / Cline / GitHub Copilot Workspace / OpenHands)*
-- **Modelo(s) Base:** *(Informe os modelos utilizados pelos agentes)*
-- **Estratégia de Coordenação:** Os agentes operaram de forma modular sobre a subpasta `T26-2A-2FDD-6CD3-97B0-E36E/`, compartilhando especificações de banco de dados D1, contratos JSON das Cloudflare Pages Functions e verificação automatizada via `validar-local.mjs`.
+## Agente 1 — Backend no projeto oficial
 
----
+`/root/backend_d1_discord` implementou os módulos de autenticação e validação agora reutilizados em lib/auth.js e lib/http.js deste treino. Skill: skills/serverless-d1-discord/SKILL.md. A correção inclui sessões opacas, state de uso único, validação no servidor e binding D1 real.
 
-## 2. Agentes Criados e Responsabilidades (Mínimo de 3 Agentes)
+## Agente 2 — Interface no projeto oficial
 
-### Agente 1: Arquiteto Serverless, Cloudflare D1 e Segurança Discord OAuth2
-- **Papel:** Modelagem do esquema relacional SQLite no Cloudflare D1 (`migrations/0001_init.sql`), implementação do fluxo de autenticação Discord OAuth2 e validação das regras de negócio no servidor (`functions/`).
-- **Skill Utilizada:** [`skills/serverless-d1-discord/SKILL.md`](./skills/serverless-d1-discord/SKILL.md)
-- **Entregas Realizadas:**
-  - Estruturação das tabelas e índices no Cloudflare D1.
-  - Proteção das rotas serverless contra manipulação no cliente.
+`/root/frontend_vanilla` implementou a interface de livros da entrega oficial com a skill vanilla-dom-ui. A interface de diagnóstico deste treino parte do scaffold do professor e foi ajustada pelo coordenador para exibir identidade real e exigir login, sem afirmar uma segunda execução desse subagente no treino.
 
-### Agente 2: Especialista em Interface Web Vanilla (HTML5, CSS3 e DOM)
-- **Papel:** Construção da interface responsiva e acessível utilizando exclusivamente HTML5 semântico, CSS3 moderno (sem sombras em fontes) e JavaScript puro (Vanilla JS), consumindo as rotas serverless via `fetch`.
-- **Skill Utilizada:** [`skills/vanilla-dom-ui/SKILL.md`](./skills/vanilla-dom-ui/SKILL.md)
-- **Entregas Realizadas:**
-  - Componentes visuais em `public/index.html`, `public/styles.css` e `public/app.js`.
-  - Inclusão do cabeçalho de perfil do Discord (`user_id`, nome e avatar) e rodapé oficial com a Chave Única `T26-2A-2FDD-6CD3-97B0-E36E`.
+## Agente 3 — Testes no projeto oficial
 
-### Agente 3: Agente de Teste, Auditoria de Segurança e Validação (Obrigatório)
-- **Papel:** Verificação independente de ponta a ponta: inspeção de contratos de API, tentativa de contorno das validações do servidor, auditoria da rubrica de 100 pontos e execução de testes funcionais.
-- **Skill Utilizada:** [`skills/teste-validacao/SKILL.md`](./skills/teste-validacao/SKILL.md)
-- **Entregas Realizadas:**
-  - Bateria de verificação de integridade dos endpoints e conformidade com a rubrica (`validar-local.mjs` e casos de teste documentados abaixo).
-  - Relatório de validação confirmando ausência de frameworks proibidos, presença da licença MIT e funcionamento no Cloudflare.
+`/root/teste_validacao` criou a suíte independente da entrega oficial, incluindo o fluxo OAuth e proteção de sessão reutilizados aqui, com a skill teste-validacao. O coordenador finalizou o harness de testes e verificou separadamente o HTTP público do Projeto 0. Testes e limites constam no relatório da entrega oficial; não são uma alegação de execução independente adicional neste diretório.
+
+## Correções e evidências
+
+- O log da publicação antiga informava UUID D1 inválido, composto de zeros. Foi configurado o banco real existente e aplicada a migração de autenticação.
+- Credenciais ficam nos secrets do Pages, sem constar no repositório.
+- O diagnóstico não aceita identidade fornecida pelo navegador e não disponibiliza perfil de demonstração.
+- Acesso público HTTPS e consulta D1 confirmados; POST anônimo retorna 401.
+- A validação oficial local deve ser executada antes de encerrar o treino. A execução física no laboratório/Scoop depende do estudante.

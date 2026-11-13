@@ -1,75 +1,18 @@
-const CHAVE_PROJETO = "T26-2A-2FDD-6CD3-97B0-E36E";
-
-const discordSession = {
-  user_id: "discord_" + CHAVE_PROJETO.slice(-4).toLowerCase(),
-  username: "Rennan",
-  avatar: "https://cdn.discordapp.com/embed/avatars/0.png",
-};
-
-function renderDiscordHeader() {
-  const el = document.getElementById("discordUserText");
-  if (el) {
-    el.textContent = "Discord: " + discordSession.username + " (" + discordSession.user_id + ")";
-  }
+const statusEl=document.getElementById('statusMessage');
+const sendBtn=document.getElementById('sendBtn');
+sendBtn.disabled=true;
+async function carregarStatus(){
+ try{
+  const res=await fetch('/api/status');const data=await res.json();if(!res.ok)throw new Error(data.error);
+  const profile=document.getElementById('discordProfile');profile.replaceChildren();
+  if(data.sessionUser){const user=data.sessionUser;const img=document.createElement('img');img.src=user.avatar;img.alt='Avatar Discord';img.width=38;img.height=38;const name=document.createElement('span');name.textContent=user.display_name+' (@'+user.username+') — ID '+user.user_id;const logout=document.createElement('button');logout.textContent='Sair';logout.addEventListener('click',async()=>{await fetch('/api/logout',{method:'POST',headers:{'Content-Type':'application/json'},body:'{}'});await carregarStatus();});profile.append(img,name,logout);}
+  else{const link=document.createElement('a');link.href='/api/auth/discord';link.textContent='Entrar com Discord';profile.append(link);}
+  sendBtn.disabled=!data.sessionUser;
+  statusEl.textContent=data.sessionUser?'D1 conectado. Envie um registro para testar a persistência.':'D1 conectado. Entre com Discord para registrar seu teste.';
+  const list=document.getElementById('recordsList');list.replaceChildren();
+  for(const item of data.ultimosRegistros){const li=document.createElement('li');li.textContent='['+item.created_at+'] @'+item.username+': '+item.conteudo;list.append(li);}
+  if(!data.ultimosRegistros.length){const li=document.createElement('li');li.textContent='Nenhum registro da sua conta nesta sessão de diagnóstico.';list.append(li);}
+ }catch(error){statusEl.textContent=error.message||'Não foi possível consultar o diagnóstico.';sendBtn.disabled=true;}
 }
-
-async function carregarStatus() {
-  const listEl = document.getElementById("recordsList");
-  try {
-    const res = await fetch("/api/status");
-    const data = await res.json();
-    listEl.innerHTML = "";
-        if (data.sessionUser) {
-      discordSession.user_id = data.sessionUser.userId;
-      discordSession.username = data.sessionUser.username;
-      discordSession.avatar = data.sessionUser.avatar || discordSession.avatar;
-      renderDiscordHeader();
-    }
-    const items = Array.isArray(data.ultimosRegistros) ? data.ultimosRegistros : [];
-    if (items.length === 0) {
-      const li = document.createElement("li");
-      li.textContent = "API Online (" + (data.d1Connected ? "D1 Conectado ✅" : "Modo Diagnóstico Serverless ✅") + "). Nenhum registro gravado ainda.";
-      listEl.appendChild(li);
-      return;
-    }
-    items.forEach((item) => {
-      const li = document.createElement("li");
-      li.textContent = "[" + (item.created_at || "agora") + "] " + item.username + " (" + item.user_id + "): " + item.conteudo;
-      listEl.appendChild(li);
-    });
-  } catch (err) {
-    listEl.innerHTML = "<li>Modo estático local. Publique no Cloudflare Pages para ativar /api/status.</li>";
-  }
-}
-
-document.getElementById("sendBtn")?.addEventListener("click", async () => {
-  const input = document.getElementById("recordInput");
-  const statusEl = document.getElementById("statusMessage");
-  const conteudo = (input.value || "").trim();
-  if (!conteudo) return;
-
-  statusEl.textContent = "Enviando para Cloudflare Function...";
-  try {
-    const res = await fetch("/api/status", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        userId: discordSession.user_id,
-        username: discordSession.username,
-        conteudo,
-      }),
-    });
-    if (res.ok) {
-      input.value = "";
-      statusEl.textContent = "✓ Registro validado e processado na borda!";
-      await carregarStatus();
-    } else {
-      statusEl.textContent = "Erro ao registrar.";
-    }
-  } catch {
-    statusEl.textContent = "API disponível após o deploy no Cloudflare Pages.";
-  }
-});
-
-renderDiscordHeader();
+sendBtn.addEventListener('click',async()=>{const input=document.getElementById('recordInput');const conteudo=input.value.trim();if(!conteudo)return;sendBtn.disabled=true;try{const res=await fetch('/api/status',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({conteudo})});const data=await res.json();if(!res.ok)throw new Error(data.error);input.value='';await carregarStatus();statusEl.textContent='Registro salvo no D1 com sua identidade Discord.';}catch(error){statusEl.textContent=error.message;sendBtn.disabled=false;}});
 carregarStatus();

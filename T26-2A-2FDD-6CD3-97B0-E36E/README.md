@@ -48,3 +48,8 @@ A aplicação consiste em um Painel de Check-in e Diagnóstico de Entrega constr
        - `DISCORD_CLIENT_SECRET`
 6. Atualize o campo **URL_CLOUDFLARE** no topo deste `README.md` com o endereço público gerado pela Cloudflare.
 7. Na raiz do repositório, execute `node validar-local.mjs T26-2A-2FDD-6CD3-97B0-E36E` para validar todos os critérios antes de fazer o commit e abrir o Pull Request.
+
+
+## Correção de ambiente em 13/11/2026
+
+O deploy anterior falhava porque o identificador D1 era um UUID fictício. Foi configurado o banco existente desta chave e incorporada a autenticação real testada no projeto oficial: state de uso único, sessão opaca com hash, cookies HttpOnly e validação de origem. O diagnóstico só aceita registros de usuários autenticados e obtém a identidade no servidor. Não há mais perfil simulado no navegador. Este projeto de teste permanece fora do Pull Request oficial.
